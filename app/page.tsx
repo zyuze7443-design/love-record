@@ -14,7 +14,7 @@ export default function Home() {
 
   const OUR_PASSWORD = "0314";
 
-  // --- 1. 登录校验与持久化 ---
+  // --- 1. 登录校验与持久化 (保持不动) ---
   useEffect(() => {
     if (localStorage.getItem('is_authed') === 'true') {
       setIsAuthed(true);
@@ -41,7 +41,7 @@ export default function Home() {
     }
   }, [password]);
 
-  // --- 2. 计时器逻辑 ---
+  // --- 2. 计时器逻辑 (保持不动) ---
   const startDate = useMemo(() => new Date('2026-03-14T00:00:00'), []);
   const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
 
@@ -63,11 +63,11 @@ export default function Home() {
   }, [startDate]);
 
   return (
-    <main className="relative min-h-screen bg-[#05040a] flex items-center justify-center overflow-hidden font-sans">
+    <main className={`relative min-h-screen ${!isAuthed ? 'bg-white' : 'bg-[#05040a]'} flex items-center justify-center overflow-hidden font-sans transition-colors duration-700`}>
       <AnimatePresence mode="wait">
         {!isAuthed ? (
           /* ==============================
-             密码输入界面
+             修改后的：白底黑字登录界面
              ============================== */
           <motion.div
             key="lock"
@@ -76,14 +76,20 @@ export default function Home() {
             exit={{ opacity: 0, scale: 0.95, filter: "blur(20px)" }}
             className="relative z-[100] flex flex-col items-center w-full max-w-sm px-6"
           >
+            {/* 图标改色 */}
             <motion.div 
               animate={isWrong ? { x: [-10, 10, -10, 10, 0] } : {}}
-              className="mb-12"
+              className="mb-10"
             >
-              <Lock className={`w-8 h-8 ${isWrong ? 'text-rose-500' : 'text-white/70'}`} strokeWidth={1.5} />
+              <Lock className={`w-8 h-8 ${isWrong ? 'text-rose-500' : 'text-black/80'}`} strokeWidth={1.5} />
             </motion.div>
 
-            <div className="relative mb-8 p-4">
+            <h2 className="text-black/90 text-lg tracking-widest font-medium mb-12">
+              我们的暗号
+            </h2>
+
+            {/* 改进的输入交互区域 */}
+            <div className="relative mb-12 p-4 cursor-pointer" onClick={() => inputRef.current?.focus()}>
               <input
                 ref={inputRef}
                 type="tel" 
@@ -91,32 +97,39 @@ export default function Home() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value.replace(/\D/g, ''))}
                 disabled={isVerifying}
-                className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-text"
+                className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
                 autoFocus
                 pattern="\d*"
                 inputMode="numeric"
               />
+              {/* 明显的圆点显示 */}
               <div className="flex gap-8 justify-center pointer-events-none">
                 {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="relative w-4 h-4">
-                    <div className={`absolute inset-0 rounded-full border-[1.5px] ${isWrong ? 'border-rose-500/80' : 'border-white/40'}`} />
+                  <div key={i} className="relative w-5 h-5">
+                    {/* 背景圈：灰色边框 */}
+                    <div className={`absolute inset-0 rounded-full border-2 ${isWrong ? 'border-rose-400' : 'border-black/10'}`} />
+                    {/* 填充点：黑色实心 */}
                     <motion.div
                       initial={false}
-                      animate={{ scale: password.length > i ? 1 : 0, opacity: password.length > i ? 1 : 0 }}
-                      className="absolute inset-0 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.6)]"
+                      animate={{ 
+                        scale: password.length > i ? 1 : 0, 
+                        opacity: password.length > i ? 1 : 0 
+                      }}
+                      className="absolute inset-0 rounded-full bg-black"
                     />
                   </div>
                 ))}
               </div>
             </div>
-            <p className="text-white/80 text-[11px] tracking-[0.4em] uppercase font-medium mt-4">
-              {isVerifying ? "Verifying Identity" : "Enter Access Code"}
+
+            <p className={`text-[11px] tracking-[0.4em] uppercase font-bold transition-colors ${isWrong ? 'text-rose-500' : 'text-black/40'}`}>
+              {isVerifying ? "Verifying..." : isWrong ? "Wrong Access Code" : "Enter Access Code"}
             </p>
           </motion.div>
 
         ) : (
           /* ==============================
-             浪漫首页
+             浪漫首页 (完全保持原始代码)
              ============================== */
           <motion.div
             key="content"
